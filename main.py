@@ -1,9 +1,13 @@
+#for windows
+import os
+os.add_dll_directory("C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.6/bin")
+
 import random
 import pickle
 from datetime import datetime
 from tensorflow import divide
 from tensorflow.keras import Input
-from tensorflow.keras.layers import Dense, Lambda, GlobalAveragePooling2D, Convolution2D, BatchNormalization, Flatten , MaxPooling2D, Dropout
+from tensorflow.keras.layers import Dense, Lambda, BatchNormalization, Flatten, Dropout
 from tensorflow.keras.preprocessing import image
 from tensorflow.image import resize
 from tensorflow.keras.applications.resnet50 import preprocess_input
@@ -13,8 +17,16 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.initializers import he_normal
 
-def get_architecture_dataset(directory, image_height, image_width, batch_size):
+def get_architecture_dataset(directory, image_height, image_width, batch_size): 
      seed = random.getrandbits(32)
+
+     '''aug = image.ImageDataGenerator(
+        rotation_range = 5, # rotation
+        width_shift_range = 0.2, # horizontal shift
+        height_shift_range = 0.2, # vertical shift
+        zoom_range = 0.2, # zoom
+        horizontal_flip = True, # horizontal flip
+        brightness_range=[0.5,1.0])'''
 
      train = image_dataset_from_directory(
     directory, labels='inferred', label_mode='int',
@@ -36,6 +48,7 @@ def densenet(image_height, image_width, channels):
         include_top = False,
         weights = "imagenet",
         input_tensor = None,
+        input_shape = (224, 224, 3),
         pooling = None
     )
 
@@ -80,7 +93,7 @@ if __name__ == "__main__":
     image_width = 700
     channels = 3
     batch_size = 32
-    epochs = 50
+    epochs = 25
     learning_rate = 2e-4
 
     train, test = get_architecture_dataset(directory, image_height, image_width, batch_size)
