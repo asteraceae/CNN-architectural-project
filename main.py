@@ -5,6 +5,7 @@ from tensorflow import divide
 from tensorflow.keras import Input
 from tensorflow.keras.layers import Dense, Lambda, GlobalAveragePooling2D, Convolution2D, BatchNormalization, Flatten , MaxPooling2D, Dropout
 from tensorflow.keras.preprocessing import image
+from tensorflow.image import resize
 from tensorflow.keras.applications.resnet50 import preprocess_input
 from keras.applications.densenet import DenseNet169
 from tensorflow.keras.utils import image_dataset_from_directory, plot_model
@@ -47,7 +48,7 @@ def densenet(image_height, image_width, channels):
             layer.trainable = False
 
     input = Input(shape = (image_height, image_width, channels))
-    preprocess = Lambda(lambda x: image.resize(x, (224, 224)), name='lamb')(input)
+    preprocess = Lambda(lambda x: resize(x, (224, 224)), name='lamb')(input)
     initializer = he_normal(seed = 32)
 
     layer = dmodel(inputs = preprocess)
@@ -92,8 +93,8 @@ if __name__ == "__main__":
     model.evaluate(test, batch_size = batch_size, verbose = 2)
 
     print("\npickling model\n")
-    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    outfile = open(f"modelout_{now}", "wb")
+    now = datetime.now().strftime('modelout_%Y-%m-%d%_H%M%S.pickle')
+    outfile = open(now, "w+")
     pickle.dump(model, outfile)
     outfile.close()
 
