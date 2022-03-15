@@ -1,6 +1,6 @@
 #for windows
-import os
-os.add_dll_directory("C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.6/bin")
+#import os
+#os.add_dll_directory("C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.6/bin")
 
 import random
 import pickle
@@ -18,30 +18,52 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.initializers import he_normal
 
 def get_architecture_dataset(directory, image_height, image_width, batch_size): 
-     seed = random.getrandbits(32)
-
-     '''aug = image.ImageDataGenerator(
-        rotation_range = 5, # rotation
-        width_shift_range = 0.2, # horizontal shift
-        height_shift_range = 0.2, # vertical shift
-        zoom_range = 0.2, # zoom
-        horizontal_flip = True, # horizontal flip
-        brightness_range=[0.5,1.0])'''
-
-     train = image_dataset_from_directory(
+    seed = random.getrandbits(32)
+    '''
+    train = image_dataset_from_directory(
     directory, labels='inferred', label_mode='int',
     class_names=None, color_mode='rgb', batch_size=batch_size, image_size=(image_height,
     image_width), shuffle=True, seed=seed, validation_split=0.2, subset='training')
- 
-     test = image_dataset_from_directory(
+
+    test = image_dataset_from_directory(
     directory, labels='inferred', label_mode='int',
     class_names=None, color_mode='rgb', batch_size=batch_size, image_size=(image_height,
     image_width), shuffle=True, seed=seed, validation_split=0.2, subset='validation')
+    
+    train = train.map(lambda x, y: (divide(x, 255), y))
+    test = test.map(lambda x, y: (divide(x, 255), y))
+'''
 
-     train = train.map(lambda x, y: (divide(x, 255), y))
-     test = test.map(lambda x, y: (divide(x, 255), y))
+    aug = image.ImageDataGenerator(
+        rotation_range = 5, # rotation
+        width_shift_range = 0.2, # horizontal shift
+        height_shift_range = 0.2, # vertical shift
+        horizontal_flip = True,
+        validation_split=0.2,
+        
+      ) 
 
-     return train, test
+    train = aug.flow_from_directory(
+        directory = directory,
+        color_mode = "rgb",
+        batch_size = batch_size,
+        target_size = (image_height, image_width),
+        shuffle = True,
+        seed = seed,
+        subset = 'training'
+    )
+
+    test = aug.flow_from_directory(
+        directory = directory,
+        color_mode = "rgb",
+        batch_size = batch_size,
+        target_size = (image_height, image_width),
+        shuffle = False,
+        seed = seed,
+        subset = 'validation'
+    )
+
+    return train, test
 
 def densenet(image_height, image_width, channels):
     dmodel = DenseNet169(
@@ -97,13 +119,13 @@ if __name__ == "__main__":
     learning_rate = 2e-4
 
     train, test = get_architecture_dataset(directory, image_height, image_width, batch_size)
-
     model = densenet(image_height, image_width, channels)
-    model.compile(optimizer = Adam(learning_rate = learning_rate), loss = "sparse_categorical_crossentropy", metrics=['accuracy'])
-    model.fit(train, batch_size = batch_size, epochs = epochs, verbose = 2)
+    model.compile(optimizer = Adam(learning_rate = learning_rate), loss = "categorical_crossentropy", metrics=['accuracy'])
+    
+    model.fit(train, batch_size = batch_size, epochs = epochs, verbose = 1)
 
     print("\nnow testing...\n")
-    model.evaluate(test, batch_size = batch_size, verbose = 2)
+    model.evaluate(test, batch_size = batch_size, verbose = 1)
 
     print("\npickling model\n")
     now = datetime.now().strftime('modelout_%Y-%m-%d%_H%M%S.pickle')
