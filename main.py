@@ -118,6 +118,7 @@ if __name__ == "__main__":
     epochs = 50
     learning_rate = 2e-4
 
+
     train, test = get_architecture_dataset(directory, image_height, image_width, batch_size)
     model = densenet(image_height, image_width, channels)
     model.compile(optimizer = Adam(learning_rate = learning_rate), loss = "categorical_crossentropy", metrics=['accuracy'])
