@@ -115,7 +115,7 @@ if __name__ == "__main__":
     image_width = 700
     channels = 3
     batch_size = 32
-    epochs = 25
+    epochs = 50
     learning_rate = 2e-4
 
     train, test = get_architecture_dataset(directory, image_height, image_width, batch_size)
@@ -129,7 +129,7 @@ if __name__ == "__main__":
 
     print("\npickling model\n")
     now = datetime.now().strftime('modelout_%Y-%m-%d%_H%M%S.pickle')
-    outfile = open(now, "w+")
+    outfile = open(now, "wb")
     pickle.dump(model, outfile)
     outfile.close()
 
